@@ -1,0 +1,39 @@
+---
+# playbook-packer-jenkins-c-lang.yml
+- name: Aprovisionando la imagen
+  hosts: default
+  become: true
+
+  tasks:
+  - name: Añade clave del repositorio debian de Google Cloud
+    ansible.builtin.get_url:
+      url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+      dest: /usr/share/keyrings/cloud.google.gpg
+      mode: '0444'
+  - name: Añade el repositorio debian de Google Cloud
+    ansible.builtin.apt_repository:
+      repo: "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main"
+      state: present
+  - name: Instala SDK de Google Cloud
+    ansible.builtin.apt:
+      name: 
+      - google-cloud-cli
+      state: present
+      update_cache: true
+  - name: Instala Java 11
+    ansible.builtin.apt:
+      name:
+        - openjdk-11-jre
+      state: present
+  - name: Instala pip3
+    ansible.builtin.apt:
+      name:
+        - python3-pip
+      state: present
+      update_cache: true
+  - name: Instala ansible
+    ansible.builtin.pip:
+      name:
+        - ansible
+        - google-auth
+      state: present

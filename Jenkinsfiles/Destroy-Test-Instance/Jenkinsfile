@@ -1,0 +1,21 @@
+pipeline {
+    agent { label 'ansible' }
+    parameters {
+        string name: 'INSTANCE_NAME', trim: true
+    }
+
+    stages {
+        stage ('Crea y aprovisiona la instancia') {
+            steps {
+                dir('ansible') {
+                    sh "ansible-galaxy install -r requirements.yml"
+                    withCredentials([file(credentialsId: 'gcp-service-account', variable: 'GCP_CREDENTIALS')]) {
+                        sshagent(['openwebinars-ssh-key']) {
+                            sh "ansible-playbook playbook-destroy.yml -e gcp_cred_file=\$GCP_CREDENTIALS -e instance_name=\$INSTANCE_NAME"
+                        }
+                    }                    
+                }
+            }
+        }
+    }
+}

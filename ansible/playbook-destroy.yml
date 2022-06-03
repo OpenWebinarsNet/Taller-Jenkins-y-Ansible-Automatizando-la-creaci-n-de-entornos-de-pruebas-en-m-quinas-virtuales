@@ -1,0 +1,31 @@
+---
+# playbook-packer-jenkins-c-lang.yml
+- name: Aprovisionando la imagen
+  hosts: localhost
+  become: true
+  vars:
+    gcp_project: just-landing-347305
+    gcp_cred_kind: serviceaccount
+    gcp_region: europe-west3
+    gcp_zone: europe-west3-b
+
+  tasks:
+  - name: Elimina dirección IP externa
+    google.cloud.gcp_compute_address:
+      name: "{{ instance_name }}-address"
+      region: "{{ gcp_region }}"
+      project: "{{ gcp_project }}"
+      auth_kind: "{{ gcp_cred_kind }}"
+      service_account_file: "{{ gcp_cred_file }}"
+      state: absent
+  - name: Elimina instancia
+    google.cloud.gcp_compute_instance:
+      name: "{{ instance_name }}"
+      machine_type: n1-standard-1
+      zone: "{{ gcp_zone }}"
+      project: "{{ gcp_project }}"
+      auth_kind: "{{ gcp_cred_kind }}"
+      service_account_file: "{{ gcp_cred_file }}"
+      state: absent
+    register: instance
+
